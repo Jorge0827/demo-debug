@@ -13,6 +13,7 @@ public class Inventory {
 
     public void addProduct(Product product) {
         products.add(product);
+        System.out.println("Producto añadido: " + product);
     }
 
     public void sellProduct(String name, Integer quantity) {
@@ -38,12 +39,22 @@ public class Inventory {
     }
 
     private Product getProductByName(String name) {
-        for (Product product : products) {
-            if (name.equals(product.getName())) {
-                return product;
+        
+            for (Product product : products) {
+                if (name.equalsIgnoreCase(product.getName())) {
+                    return product;
+                }
             }
+
+            throw new NullPointerException("el producto " + name + " No se encuentra en el inventario");
+                
+        
+            
         }
-        return null;
+        
+        
+    
+        
     }
 
-}
+
