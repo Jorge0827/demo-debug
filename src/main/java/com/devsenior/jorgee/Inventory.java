@@ -3,6 +3,9 @@ package com.devsenior.jorgee;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.devsenior.jorgee.exceptions.NotEnoughQuantityException;
+import com.devsenior.jorgee.exceptions.NotFoundException;
+
 public class Inventory {
 
     private List<Product> products;
@@ -12,49 +15,50 @@ public class Inventory {
     }
 
     public void addProduct(Product product) {
-        products.add(product);
-        System.out.println("Producto añadido: " + product);
+        try {
+            var currentProduct = getProductByName(product.getName());
+
+            var newQuantity = currentProduct.getStock() + product.getStock();
+            var newPrice = (currentProduct.getStock() * currentProduct.getPrice()
+                    + product.getStock() * product.getPrice()) / newQuantity;
+
+            currentProduct.setStock(newQuantity);
+            // El precio no puede ser cambiado
+            currentProduct.setPrice(newPrice);
+        } catch (NotFoundException e) {
+            products.add(product);
+        }
     }
 
-    public void sellProduct(String name, Integer quantity) {
-        // Producto exista
+    public void sellProduct(String name, Integer quantity) throws NotFoundException {
+        // Producto existe
         var product = getProductByName(name);
 
-        // Hay cantidad suficiente
+        // No hay cantidad suficiente
         if (product.getStock() < quantity) {
-            // No hay cantidad suficiente
+            throw new NotEnoughQuantityException("El producto '" + name + "' no tiene cantidad suficiente");
         }
-        product.setStock(product.getStock() - quantity);
 
+        product.setStock(product.getStock() - quantity);
     }
 
     public Double calculateTotalInventory() {
         var total = 0d;
 
-        for (Product product : products) {
+        for (var product : products) {
             total += product.getStock() * product.getPrice();
-
         }
+
         return total;
     }
 
-    private Product getProductByName(String name) {
-        
-            for (Product product : products) {
-                if (name.equalsIgnoreCase(product.getName())) {
-                    return product;
-                }
+    private Product getProductByName(String name) throws NotFoundException {
+        for (var product : products) {
+            if (name.equalsIgnoreCase(product.getName())) {
+                return product;
             }
-
-            throw new NullPointerException("el producto " + name + " No se encuentra en el inventario");
-                
-        
-            
         }
-        
-        
-    
-        
+        throw new NotFoundException("Producto '" + name + "' existe en el inventario");
     }
 
-
+}
